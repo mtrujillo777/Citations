@@ -2,10 +2,9 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Citation Chaos Learning Edition</title>
+<title>Citation Chaos – Color Feedback</title>
 
 <style>
-
 body{
 font-family:Arial;
 background:#020617;
@@ -13,13 +12,11 @@ color:white;
 text-align:center;
 margin:0;
 }
-
 header{
 background:#0f172a;
 padding:20px;
 font-size:32px;
 }
-
 button{
 padding:12px 20px;
 margin:6px;
@@ -30,15 +27,8 @@ cursor:pointer;
 background:#22c55e;
 color:white;
 }
-
-button:hover{
-background:#16a34a;
-}
-
-#menu{
-margin-top:30px;
-}
-
+button:hover{background:#16a34a;}
+#menu{margin-top:30px;}
 #instructions{
 max-width:700px;
 margin:auto;
@@ -47,30 +37,16 @@ padding:20px;
 border-radius:10px;
 line-height:1.6;
 }
-
-#game{
-display:none;
-max-width:900px;
-margin:auto;
-padding:20px;
-}
-
-#scoreboard{
-font-size:20px;
-margin-bottom:15px;
-}
-
-#timer{
-color:#facc15;
-}
-
+#game{display:none;max-width:900px;margin:auto;padding:20px;}
+#scoreboard{font-size:20px;margin-bottom:15px;}
+#timer{color:#facc15;}
 #citationLine{
 border:2px dashed #94a3b8;
 padding:10px;
 min-height:40px;
 margin-bottom:20px;
+font-size:18px;
 }
-
 .piece{
 display:inline-block;
 padding:10px 14px;
@@ -79,373 +55,160 @@ background:#2563eb;
 border-radius:6px;
 cursor:pointer;
 }
-
-#feedback{
-margin-top:15px;
-font-size:18px;
-color:#fbbf24;
-}
-
-#animation{
-font-size:40px;
-opacity:0;
-transition:opacity .5s;
-}
-
-#leaderboard{
-margin-top:40px;
-background:#111827;
-padding:20px;
-border-radius:10px;
-}
-
+.piece:hover{background:#1d4ed8;}
+#feedback{margin-top:15px;font-size:18px;}
+#leaderboard{margin-top:40px;background:#111827;padding:20px;border-radius:10px;}
 </style>
-
 </head>
-
 <body>
 
 <header>🎰 Citation Chaos</header>
 
 <div id="menu">
-
 <div id="instructions">
-
 <h2>How to Play</h2>
-
 <p>
-1️⃣ Choose APA or MLA.<br><br>
-2️⃣ Click the citation pieces in the correct order.<br><br>
-3️⃣ Press <b>Check Citation</b>.<br><br>
-4️⃣ If incorrect, the game will explain what part of the citation was wrong.<br><br>
-5️⃣ Learn and try again or skip to the next citation!
+1️⃣ Choose APA or MLA.<br>
+2️⃣ Click the citation pieces in the correct order.<br>
+3️⃣ Press <b>Check Citation</b>.<br>
+4️⃣ Correct parts will appear <span style="color:lime">green</span> and incorrect parts <span style="color:red">red</span>.<br>
+5️⃣ Retry or skip to the next citation!
 </p>
-
 </div>
-
-<br>
-
 <button onclick="startGame('APA')">Play APA</button>
 <button onclick="startGame('MLA')">Play MLA</button>
-
 </div>
 
 <div id="game">
-
 <div id="scoreboard">
-
 Style: <span id="style"></span> |
 Score: <span id="score">0</span> |
 Time: <span id="timer">90</span>
-
 </div>
 
 <button onclick="spinCitation()">New Citation</button>
 <button onclick="undo()">Undo</button>
 
 <div id="citationLine"></div>
-
 <div id="pieces"></div>
-
 <button onclick="checkAnswer()">Check Citation</button>
 
 <div id="feedback"></div>
 
 <div>
-
-<button onclick="retry()">Try Again</button>
+<button onclick="retry()">Retry Citation</button>
 <button onclick="spinCitation()">Next Citation</button>
-
 </div>
-
-<div id="animation"></div>
 
 <div id="leaderboard">
-
 <h3>🏆 Leaderboard</h3>
 <div id="scores"></div>
-
-</div>
-
 </div>
 
 <script>
-
-let style="APA"
-let score=0
-let time=90
-let playerOrder=[]
-let currentPuzzle=null
+let style="APA", score=0, time=90, playerOrder=[], currentPuzzle=null;
 
 let puzzles={
-
 APA:[
-{
-correct:[
-"Smith, J.",
-"(2020).",
-"The psychology of motivation.",
-"Journal of Learning, 12(2),",
-"45–59."
+{correct:["Smith, J.","(2020).","The psychology of motivation.","Journal of Learning, 12(2),","45–59."],
+tips:["Author first","Year after author","Article title next","Journal & volume","Pages last"]},
+{correct:["Garcia, L.","(2018).","Culture and communication.","Communication Review, 9(1),","12–28."],
+tips:["Author first","Year after author","Article title next","Journal & volume","Pages last"]}
 ],
-tips:[
-"Author comes first in APA.",
-"The year follows the author in parentheses.",
-"The article title comes next.",
-"Journal title and volume appear next.",
-"Page numbers appear at the end."
-]
-},
-
-{
-correct:[
-"Garcia, L.",
-"(2018).",
-"Culture and communication.",
-"Communication Review, 9(1),",
-"12–28."
-],
-tips:[
-"APA starts with the author.",
-"Year appears after the author.",
-"Article title follows.",
-"Journal title and issue come next.",
-"Pages appear last."
-]
-}
-
-],
-
 MLA:[
-{
-correct:[
-"Smith, John.",
-"\"The Psychology of Motivation.\"",
-"Journal of Learning,",
-"vol. 12, no. 2,",
-"2020, pp. 45–59."
-],
-tips:[
-"MLA begins with the author.",
-"Article title appears in quotation marks.",
-"Journal title follows the article title.",
-"Volume and issue numbers come next.",
-"Year and page numbers appear last."
+{correct:["Smith, John.","\"The Psychology of Motivation.\"","Journal of Learning,","vol. 12, no. 2,","2020, pp. 45–59."],
+tips:["Author first","Article title in quotes","Journal title","Volume & issue","Year & pages last"]}
 ]
-}
-]
-
-}
+};
 
 function startGame(selected){
-
-style=selected
-
-document.getElementById("menu").style.display="none"
-document.getElementById("game").style.display="block"
-
-document.getElementById("style").textContent=style
-
-startTimer()
-
-spinCitation()
-
+style=selected;
+document.getElementById("menu").style.display="none";
+document.getElementById("game").style.display="block";
+document.getElementById("style").textContent=style;
+startTimer();
+spinCitation();
 }
 
 function spinCitation(){
-
-playerOrder=[]
-
-let list=puzzles[style]
-
-currentPuzzle=list[Math.floor(Math.random()*list.length)]
-
-document.getElementById("citationLine").innerHTML=""
-document.getElementById("feedback").innerHTML=""
-
-buildPieces()
-
+playerOrder=[];
+let list=puzzles[style];
+currentPuzzle=list[Math.floor(Math.random()*list.length)];
+document.getElementById("citationLine").innerHTML="";
+document.getElementById("feedback").innerHTML="";
+buildPieces();
 }
 
-function shuffle(array){
-
-return array.sort(()=>Math.random()-0.5)
-
-}
+function shuffle(array){return array.sort(()=>Math.random()-0.5);}
 
 function buildPieces(){
-
-let piecesDiv=document.getElementById("pieces")
-
-piecesDiv.innerHTML=""
-
-let shuffled=shuffle([...currentPuzzle.correct])
-
+let piecesDiv=document.getElementById("pieces");
+piecesDiv.innerHTML="";
+let shuffled=shuffle([...currentPuzzle.correct]);
 shuffled.forEach(p=>{
-
-let div=document.createElement("div")
-
-div.className="piece"
-div.textContent=p
-
-div.onclick=function(){
-
-playerOrder.push(p)
-updateLine()
-div.style.display="none"
-
-}
-
-piecesDiv.appendChild(div)
-
-})
-
+let div=document.createElement("div");
+div.className="piece";
+div.textContent=p;
+div.onclick=function(){playerOrder.push(p); updateLine(); div.style.display="none";}
+piecesDiv.appendChild(div);
+});
 }
 
 function updateLine(){
-
-document.getElementById("citationLine").innerHTML=playerOrder.join(" ")
-
+document.getElementById("citationLine").innerHTML=playerOrder.join(" ");
 }
 
-function undo(){
-
-playerOrder.pop()
-updateLine()
-
-spinCitation()
-
-}
+function undo(){playerOrder.pop(); updateLine(); buildPieces();}
 
 function checkAnswer(){
-
-let correct=currentPuzzle.correct
-
-if(JSON.stringify(playerOrder)===JSON.stringify(correct)){
-
-score+=10
-document.getElementById("score").textContent=score
-
-showAnimation("🎉 Correct!")
-
-spinCitation()
-
-}else{
-
-giveFeedback()
-
-showAnimation("❌")
-
-}
-
-}
-
-function giveFeedback(){
-
-let correct=currentPuzzle.correct
-
+let correct=currentPuzzle.correct;
+let html="";
 for(let i=0;i<playerOrder.length;i++){
-
-if(playerOrder[i]!==correct[i]){
-
-document.getElementById("feedback").innerHTML=
-"Learning Tip: "+currentPuzzle.tips[i]
-
-break
-
+if(playerOrder[i]===correct[i]) html+='<span style="color:lime">'+playerOrder[i]+'</span> ';
+else html+='<span style="color:red">'+playerOrder[i]+'</span> ';
+}
+document.getElementById("citationLine").innerHTML=html;
+if(JSON.stringify(playerOrder)===JSON.stringify(correct)){
+score+=10;
+document.getElementById("score").textContent=score;
+document.getElementById("feedback").textContent="✅ All correct! Great job!";
+} else {
+document.getElementById("feedback").textContent="❌ Some parts are incorrect. Check colors and try again or skip.";
+}
 }
 
-}
-
-}
-
-function retry(){
-
-playerOrder=[]
-document.getElementById("citationLine").innerHTML=""
-document.getElementById("feedback").innerHTML=""
-
-buildPieces()
-
-}
-
-function showAnimation(text){
-
-let anim=document.getElementById("animation")
-
-anim.innerHTML=text
-anim.style.opacity=1
-
-setTimeout(()=>{
-
-anim.style.opacity=0
-
-},1200)
-
-}
+function retry(){playerOrder=[]; document.getElementById("citationLine").innerHTML=""; document.getElementById("feedback").textContent=""; buildPieces();}
 
 function startTimer(){
-
 let interval=setInterval(()=>{
-
-time--
-
-document.getElementById("timer").textContent=time
-
-if(time<=0){
-
-clearInterval(interval)
-
-endGame()
-
-}
-
-},1000)
-
+time--;
+document.getElementById("timer").textContent=time;
+if(time<=0){clearInterval(interval); endGame();}
+},1000);
 }
 
 function endGame(){
-
-showAnimation("🏁")
-
-saveScore()
-
+document.getElementById("feedback").textContent="🏁 Time's up! Final Score: "+score;
+saveScore();
 }
 
 function saveScore(){
-
-let scores=JSON.parse(localStorage.getItem("citationScores")||"[]")
-
-scores.push(score)
-
-scores.sort((a,b)=>b-a)
-
-scores=scores.slice(0,5)
-
-localStorage.setItem("citationScores",JSON.stringify(scores))
-
-displayScores()
-
+let scores=JSON.parse(localStorage.getItem("citationScores")||"[]");
+scores.push(score);
+scores.sort((a,b)=>b-a);
+scores=scores.slice(0,5);
+localStorage.setItem("citationScores",JSON.stringify(scores));
+displayScores();
 }
 
 function displayScores(){
-
-let scores=JSON.parse(localStorage.getItem("citationScores")||"[]")
-
-let html=""
-
-scores.forEach(s=>{
-
-html+="<div>"+s+"</div>"
-
-})
-
-document.getElementById("scores").innerHTML=html
-
+let scores=JSON.parse(localStorage.getItem("citationScores")||"[]");
+let html="";
+scores.forEach(s=>{html+="<div>"+s+"</div>";});
+document.getElementById("scores").innerHTML=html;
 }
 
-displayScores()
-
+displayScores();
 </script>
 
 </body>
