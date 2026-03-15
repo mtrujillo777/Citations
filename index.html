@@ -3,107 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <title>Trujillo's Citation Chaos</title>
-
 <style>
 body{
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
-    color:white;
-    text-align:center;
-    margin:0;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
+  color:white;
+  text-align:center;
+  margin:0;
 }
-
 header{
-    background: #1f5f3b;
-    padding: 25px;
-    font-size: 36px;
-    letter-spacing: 2px;
-    border-bottom: 5px solid #22c55e;
+  background: #1f5f3b;
+  padding: 25px;
+  font-size: 36px;
+  letter-spacing: 2px;
+  border-bottom: 5px solid #22c55e;
 }
-
 button{
-    padding: 12px 20px;
-    margin: 8px;
-    font-size: 16px;
-    border:none;
-    border-radius: 8px;
-    cursor: pointer;
-    background: #22c55e;
-    color:white;
-    transition: transform 0.1s;
+  padding: 12px 20px;
+  margin: 8px;
+  font-size: 16px;
+  border:none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #22c55e;
+  color:white;
+  transition: transform 0.1s;
 }
-button:hover{
-    background: #16a34a;
-    transform: scale(1.05);
-}
-
-#menu{
-    margin-top:30px;
-}
-
+button:hover{background: #16a34a; transform: scale(1.05);}
+#menu{margin-top:30px;}
 #instructions{
-    max-width:750px;
-    margin:auto;
-    background:#111827;
-    padding:20px;
-    border-radius:12px;
-    line-height:1.6;
-    border: 2px solid #22c55e;
+  max-width:750px;
+  margin:auto;
+  background:#111827;
+  padding:20px;
+  border-radius:12px;
+  line-height:1.6;
+  border: 2px solid #22c55e;
 }
-
 #game{
-    display:none;
-    max-width:900px;
-    margin:auto;
-    padding:20px;
-    border: 3px solid #22c55e;
-    border-radius: 12px;
-    background: rgba(15,23,42,0.9);
-    box-shadow: 0 0 20px #22c55e;
+  display:none;
+  max-width:900px;
+  margin:auto;
+  padding:20px;
+  border: 3px solid #22c55e;
+  border-radius: 12px;
+  background: rgba(15,23,42,0.9);
+  box-shadow: 0 0 20px #22c55e;
+  position: relative;
+  overflow: hidden;
 }
-
-#scoreboard{
-    font-size:20px;
-    margin-bottom:15px;
-}
-
-#timer{
-    color:#facc15;
-}
-
+#scoreboard{font-size:20px;margin-bottom:15px;}
+#timer{color:#facc15;}
 #citationLine{
-    border:2px dashed #94a3b8;
-    padding:15px;
-    min-height:50px;
-    margin-bottom:20px;
-    font-size:18px;
-    border-radius:8px;
-    background: #111827;
+  border:2px dashed #94a3b8;
+  padding:15px;
+  min-height:50px;
+  margin-bottom:20px;
+  font-size:18px;
+  border-radius:8px;
+  background: #111827;
 }
-
 .piece{
-    display:inline-block;
-    padding:10px 14px;
-    margin:6px;
-    background:#2563eb;
-    border-radius:6px;
-    cursor:pointer;
-    transition: transform 0.1s;
+  display:inline-block;
+  padding:10px 14px;
+  margin:6px;
+  background:#2563eb;
+  border-radius:6px;
+  cursor:pointer;
+  transition: transform 0.2s;
 }
-.piece:hover{
-    background:#1d4ed8;
-    transform: scale(1.05);
+.piece:hover{background:#1d4ed8; transform: scale(1.05);}
+#feedback{margin-top:15px;font-size:18px;}
+#buttons{margin-top:20px;}
+.confetti{
+  position:absolute;
+  width:10px;
+  height:10px;
+  background:lime;
+  animation:fall 1.5s linear forwards;
 }
-
-#feedback{
-    margin-top:15px;
-    font-size:18px;
+@keyframes fall{
+  0%{transform:translateY(0px) rotate(0deg);}
+  100%{transform:translateY(600px) rotate(360deg);}
 }
-
-#buttons{
-    margin-top:20px;
-}
-
 </style>
 </head>
 <body>
@@ -131,7 +113,7 @@ button:hover{
 Style: <span id="style"></span> | Score: <span id="score">0</span> | Time: <span id="timer">90</span>
 </div>
 
-<button onclick="spinCitation()">New Citation</button>
+<button onclick="spinCitation()">🎰 New Citation</button>
 <button onclick="undo()">Undo Last Piece</button>
 
 <div id="citationLine"></div>
@@ -145,7 +127,6 @@ Style: <span id="style"></span> | Score: <span id="score">0</span> | Time: <span
 <button onclick="retry()">Retry Citation</button>
 <button onclick="spinCitation()">Next Citation</button>
 </div>
-
 </div>
 
 <script>
@@ -153,32 +134,20 @@ let style="APA", score=0, time=90, playerOrder=[], currentPuzzle=null;
 
 let puzzles={
 APA:[
-{correct:["Smith, J.","(2020).","The psychology of motivation.","Journal of Learning, 12(2),","45–59."],
-type:"Journal Article"},
-{correct:["Garcia, L.","(2018).","Culture and communication.","Communication Review, 9(1),","12–28."],
-type:"Journal Article"},
-{correct:["Title of Page.","(2023).","Website Name.","https://www.example.com"],
-type:"Website, no author"},
-{correct:["Johnson, R. (Ed.).","(2020).","Title of Book.","Publisher."],
-type:"Edited Book"},
-{correct:["American Library Association.","(2021).","Library resources.","https://www.ala.org/resources"],
-type:"Organization Author"},
-{correct:["Smith, J., & Garcia, L.","(2022).","Title of article.","Journal Name, 10(1),","12-20."],
-type:"Two Authors"}
+{correct:["Smith, J.","(2020).","The psychology of motivation.","Journal of Learning, 12(2),","45–59."],type:"Journal Article"},
+{correct:["Garcia, L.","(2018).","Culture and communication.","Communication Review, 9(1),","12–28."],type:"Journal Article"},
+{correct:["Title of Page.","(2023).","Website Name.","https://www.example.com"],type:"Website, no author"},
+{correct:["Johnson, R. (Ed.).","(2020).","Title of Book.","Publisher."],type:"Edited Book"},
+{correct:["American Library Association.","(2021).","Library resources.","https://www.ala.org/resources"],type:"Organization Author"},
+{correct:["Smith, J., & Garcia, L.","(2022).","Title of article.","Journal Name, 10(1),","12-20."],type:"Two Authors"}
 ],
 MLA:[
-{correct:["Smith, John.","\"The Psychology of Motivation.\"","Journal of Learning,","vol. 12, no. 2,","2020, pp. 45–59."],
-type:"Journal Article"},
-{correct:["Garcia, Luis.","\"Culture and Communication.\"","Communication Review,","vol. 9, no. 1,","2018, pp. 12–28."],
-type:"Journal Article"},
-{correct:["\"Title of Page.\"","Website Name,","23 Mar. 2023,","https://www.example.com"],
-type:"Website, no author"},
-{correct:["Johnson, Robert, editor.","Title of Book.","Publisher, 2020."],
-type:"Edited Book"},
-{correct:["American Library Association.","\"Library Resources.\"","https://www.ala.org/resources,","2021."],
-type:"Organization Author"},
-{correct:["Smith, John, and Luis Garcia.","\"Title of Article.\"","Journal Name, vol. 10, no. 1,","2022, pp. 12–20."],
-type:"Two Authors"}
+{correct:["Smith, John.","\"The Psychology of Motivation.\"","Journal of Learning,","vol. 12, no. 2,","2020, pp. 45–59."],type:"Journal Article"},
+{correct:["Garcia, Luis.","\"Culture and Communication.\"","Communication Review,","vol. 9, no. 1,","2018, pp. 12–28."],type:"Journal Article"},
+{correct:["\"Title of Page.\"","Website Name,","23 Mar. 2023,","https://www.example.com"],type:"Website, no author"},
+{correct:["Johnson, Robert, editor.","Title of Book.","Publisher, 2020."],type:"Edited Book"},
+{correct:["American Library Association.","\"Library Resources.\"","https://www.ala.org/resources,","2021."],type:"Organization Author"},
+{correct:["Smith, John, and Luis Garcia.","\"Title of Article.\"","Journal Name, vol. 10, no. 1,","2022, pp. 12–20."],type:"Two Authors"}
 ]
 };
 
@@ -193,6 +162,7 @@ spinCitation();
 
 function spinCitation(){
 playerOrder=[];
+animateSlot();
 let list=puzzles[style];
 currentPuzzle=list[Math.floor(Math.random()*list.length)];
 document.getElementById("citationLine").innerHTML="";
@@ -219,9 +189,7 @@ piecesDiv.appendChild(div);
 });
 }
 
-function updateLine(){
-document.getElementById("citationLine").innerHTML=playerOrder.join(" ");
-}
+function updateLine(){document.getElementById("citationLine").innerHTML=playerOrder.join(" ");}
 
 function undo(){playerOrder.pop(); updateLine(); buildPieces();}
 
@@ -237,7 +205,8 @@ if(JSON.stringify(playerOrder)===JSON.stringify(correct)){
 score+=10;
 document.getElementById("score").textContent=score;
 document.getElementById("feedback").textContent="✅ All correct! Great job!";
-} else {
+launchConfetti();
+}else{
 document.getElementById("feedback").textContent="❌ Some parts are incorrect. Check colors and retry or skip to next citation.";
 }
 }
@@ -252,8 +221,29 @@ if(time<=0){clearInterval(interval); endGame();}
 },1000);
 }
 
-function endGame(){
-document.getElementById("feedback").textContent="🏁 Time's up! Final Score: "+score;
+function endGame(){document.getElementById("feedback").textContent="🏁 Time's up! Final Score: "+score;}
+
+function launchConfetti(){
+for(let i=0;i<100;i++){
+let conf=document.createElement("div");
+conf.className="confetti";
+conf.style.left=Math.random()*window.innerWidth+"px";
+conf.style.background=`hsl(${Math.random()*360},100%,50%)`;
+conf.style.animationDuration=1+Math.random()+'s';
+document.body.appendChild(conf);
+setTimeout(()=>{document.body.removeChild(conf);},1500);
+}
+}
+
+function animateSlot(){
+let slot=document.getElementById("citationLine");
+slot.innerHTML="";
+let shuffled=shuffle([...currentPuzzle.correct]);
+let index=0;
+let interval=setInterval(()=>{
+slot.innerHTML=shuffled[index];
+index++;
+if(index>=shuffled.length){clearInterval(interval); slot.innerHTML="";}},150);
 }
 </script>
 
