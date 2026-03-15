@@ -4,47 +4,52 @@
 <meta charset="UTF-8">
 <title>Trujillo's Citation Chaos</title>
 <style>
-body{
+body {
   font-family: 'Arial', sans-serif;
   background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
-  color:white;
-  text-align:center;
-  margin:0;
+  color: white;
+  text-align: center;
+  margin: 0;
 }
-header{
+header {
   background: #1f5f3b;
   padding: 25px;
   font-size: 36px;
   letter-spacing: 2px;
   border-bottom: 5px solid #22c55e;
 }
-button{
+button {
   padding: 12px 20px;
   margin: 8px;
   font-size: 16px;
-  border:none;
+  border: none;
   border-radius: 8px;
   cursor: pointer;
   background: #22c55e;
-  color:white;
+  color: white;
   transition: transform 0.1s;
 }
-button:hover{background: #16a34a; transform: scale(1.05);}
-#menu{margin-top:30px;}
-#instructions{
-  max-width:750px;
-  margin:auto;
-  background:#111827;
-  padding:20px;
-  border-radius:12px;
-  line-height:1.6;
+button:hover {
+  background: #16a34a;
+  transform: scale(1.05);
+}
+#menu {
+  margin-top: 30px;
+}
+#instructions {
+  max-width: 750px;
+  margin: auto;
+  background: #111827;
+  padding: 20px;
+  border-radius: 12px;
+  line-height: 1.6;
   border: 2px solid #22c55e;
 }
-#game{
-  display:none;
-  max-width:900px;
-  margin:auto;
-  padding:20px;
+#game {
+  display: none;
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
   border: 3px solid #22c55e;
   border-radius: 12px;
   background: rgba(15,23,42,0.9);
@@ -52,39 +57,52 @@ button:hover{background: #16a34a; transform: scale(1.05);}
   position: relative;
   overflow: hidden;
 }
-#scoreboard{font-size:20px;margin-bottom:15px;}
-#timer{color:#facc15;}
-#citationLine{
-  border:2px dashed #94a3b8;
-  padding:15px;
-  min-height:50px;
-  margin-bottom:20px;
-  font-size:18px;
-  border-radius:8px;
+#scoreboard {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+#timer {
+  color: #facc15;
+}
+#citationLine {
+  border: 2px dashed #94a3b8;
+  padding: 15px;
+  min-height: 50px;
+  margin-bottom: 20px;
+  font-size: 18px;
+  border-radius: 8px;
   background: #111827;
 }
-.piece{
-  display:inline-block;
-  padding:10px 14px;
-  margin:6px;
-  background:#2563eb;
-  border-radius:6px;
-  cursor:pointer;
+.piece {
+  display: inline-block;
+  padding: 10px 14px;
+  margin: 6px;
+  background: #2563eb;
+  border-radius: 6px;
+  cursor: pointer;
   transition: transform 0.2s;
 }
-.piece:hover{background:#1d4ed8; transform: scale(1.05);}
-#feedback{margin-top:15px;font-size:18px;}
-#buttons{margin-top:20px;}
-.confetti{
-  position:absolute;
-  width:10px;
-  height:10px;
-  background:lime;
-  animation:fall 1.5s linear forwards;
+.piece:hover {
+  background: #1d4ed8;
+  transform: scale(1.05);
 }
-@keyframes fall{
-  0%{transform:translateY(0px) rotate(0deg);}
-  100%{transform:translateY(600px) rotate(360deg);}
+#feedback {
+  margin-top: 15px;
+  font-size: 18px;
+}
+#buttons {
+  margin-top: 20px;
+}
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  animation: fall 1.5s linear forwards;
+  border-radius: 50%;
+}
+@keyframes fall {
+  0% { transform: translateY(0px) rotate(0deg); }
+  100% { transform: translateY(600px) rotate(360deg); }
 }
 </style>
 </head>
@@ -130,8 +148,10 @@ Style: <span id="style"></span> | Score: <span id="score">0</span> | Time: <span
 </div>
 
 <script>
+// Game state
 let style="APA", score=0, time=90, playerOrder=[], currentPuzzle=null;
 
+// Citation data
 let puzzles={
 APA:[
 {correct:["Smith, J.","(2020).","The psychology of motivation.","Journal of Learning, 12(2),","45–59."],type:"Journal Article"},
@@ -151,99 +171,113 @@ MLA:[
 ]
 };
 
+// Start game
 function startGame(selected){
-style=selected;
-document.getElementById("menu").style.display="none";
-document.getElementById("game").style.display="block";
-document.getElementById("style").textContent=style;
-startTimer();
-spinCitation();
+  style=selected;
+  document.getElementById("menu").style.display="none";
+  document.getElementById("game").style.display="block";
+  document.getElementById("style").textContent=style;
+  startTimer();
+  spinCitation();
 }
 
-function spinCitation(){
-playerOrder=[];
-animateSlot();
-let list=puzzles[style];
-currentPuzzle=list[Math.floor(Math.random()*list.length)];
-document.getElementById("citationLine").innerHTML="";
-document.getElementById("feedback").innerHTML="";
-buildPieces();
-}
+// Shuffle array
+function shuffle(array){ return array.sort(()=>Math.random()-0.5); }
 
-function shuffle(array){return array.sort(()=>Math.random()-0.5);}
-
+// Build citation pieces
 function buildPieces(){
-let piecesDiv=document.getElementById("pieces");
-piecesDiv.innerHTML="";
-let shuffled=shuffle([...currentPuzzle.correct]);
-shuffled.forEach(p=>{
-let div=document.createElement("div");
-div.className="piece";
-div.textContent=p;
-div.onclick=function(){
-playerOrder.push(p);
-updateLine();
-div.style.display="none";
-};
-piecesDiv.appendChild(div);
-});
+  let piecesDiv=document.getElementById("pieces");
+  piecesDiv.innerHTML="";
+  let shuffled=shuffle([...currentPuzzle.correct]);
+  shuffled.forEach(p=>{
+    let div=document.createElement("div");
+    div.className="piece";
+    div.textContent=p;
+    div.onclick=function(){
+      playerOrder.push(p);
+      updateLine();
+      div.style.display="none";
+    };
+    piecesDiv.appendChild(div);
+  });
 }
 
-function updateLine(){document.getElementById("citationLine").innerHTML=playerOrder.join(" ");}
+// Update citation line
+function updateLine(){
+  document.getElementById("citationLine").innerHTML=playerOrder.join(" ");
+}
 
-function undo(){playerOrder.pop(); updateLine(); buildPieces();}
+// Undo last piece
+function undo(){ playerOrder.pop(); updateLine(); buildPieces(); }
 
+// Retry current citation
+function retry(){ playerOrder=[]; document.getElementById("citationLine").innerHTML=""; document.getElementById("feedback").textContent=""; buildPieces(); }
+
+// Check answer
 function checkAnswer(){
-let correct=currentPuzzle.correct;
-let html="";
-for(let i=0;i<playerOrder.length;i++){
-if(playerOrder[i]===correct[i]) html+='<span style="color:lime">'+playerOrder[i]+'</span> ';
-else html+='<span style="color:red">'+playerOrder[i]+'</span> ';
-}
-document.getElementById("citationLine").innerHTML=html;
-if(JSON.stringify(playerOrder)===JSON.stringify(correct)){
-score+=10;
-document.getElementById("score").textContent=score;
-document.getElementById("feedback").textContent="✅ All correct! Great job!";
-launchConfetti();
-}else{
-document.getElementById("feedback").textContent="❌ Some parts are incorrect. Check colors and retry or skip to next citation.";
-}
-}
-
-function retry(){playerOrder=[]; document.getElementById("citationLine").innerHTML=""; document.getElementById("feedback").textContent=""; buildPieces();}
-
-function startTimer(){
-let interval=setInterval(()=>{
-time--;
-document.getElementById("timer").textContent=time;
-if(time<=0){clearInterval(interval); endGame();}
-},1000);
+  let correct=currentPuzzle.correct;
+  let html="";
+  for(let i=0;i<playerOrder.length;i++){
+    if(playerOrder[i]===correct[i]) html+='<span style="color:lime">'+playerOrder[i]+'</span> ';
+    else html+='<span style="color:red">'+playerOrder[i]+'</span> ';
+  }
+  document.getElementById("citationLine").innerHTML=html;
+  if(JSON.stringify(playerOrder)===JSON.stringify(correct)){
+    score+=10;
+    document.getElementById("score").textContent=score;
+    document.getElementById("feedback").textContent="✅ All correct! Great job!";
+    launchConfetti();
+  } else {
+    document.getElementById("feedback").textContent="❌ Some parts are incorrect. Check colors and retry or skip.";
+  }
 }
 
-function endGame(){document.getElementById("feedback").textContent="🏁 Time's up! Final Score: "+score;}
+// Spin new citation with slot effect
+function spinCitation(){
+  playerOrder=[];
+  document.getElementById("citationLine").innerHTML="";
+  document.getElementById("feedback").innerHTML="";
+  let list=puzzles[style];
+  currentPuzzle=list[Math.floor(Math.random()*list.length)];
+  
+  // Slot animation
+  let slot=document.getElementById("citationLine");
+  let shuffled=shuffle([...currentPuzzle.correct]);
+  let index=0;
+  let interval=setInterval(()=>{
+    slot.innerHTML=shuffled[index];
+    index++;
+    if(index>=shuffled.length){
+      clearInterval(interval);
+      slot.innerHTML=""; // clear after spin
+      buildPieces();     // show pieces to play
+    }
+  }, 150);
+}
 
+// Confetti effect
 function launchConfetti(){
-for(let i=0;i<100;i++){
-let conf=document.createElement("div");
-conf.className="confetti";
-conf.style.left=Math.random()*window.innerWidth+"px";
-conf.style.background=`hsl(${Math.random()*360},100%,50%)`;
-conf.style.animationDuration=1+Math.random()+'s';
-document.body.appendChild(conf);
-setTimeout(()=>{document.body.removeChild(conf);},1500);
-}
+  for(let i=0;i<100;i++){
+    let conf=document.createElement("div");
+    conf.className="confetti";
+    conf.style.left=Math.random()*window.innerWidth+"px";
+    conf.style.background=`hsl(${Math.random()*360},100%,50%)`;
+    conf.style.animationDuration=1+Math.random()+'s';
+    document.body.appendChild(conf);
+    setTimeout(()=>{document.body.removeChild(conf);},1500);
+  }
 }
 
-function animateSlot(){
-let slot=document.getElementById("citationLine");
-slot.innerHTML="";
-let shuffled=shuffle([...currentPuzzle.correct]);
-let index=0;
-let interval=setInterval(()=>{
-slot.innerHTML=shuffled[index];
-index++;
-if(index>=shuffled.length){clearInterval(interval); slot.innerHTML="";}},150);
+// Timer
+function startTimer(){
+  let interval=setInterval(()=>{
+    time--;
+    document.getElementById("timer").textContent=time;
+    if(time<=0){ clearInterval(interval); endGame(); }
+  },1000);
+}
+function endGame(){
+  document.getElementById("feedback").textContent="🏁 Time's up! Final Score: "+score;
 }
 </script>
 
