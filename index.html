@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Citation Chaos Arcade</title>
+<title>Citation Chaos Learning Edition</title>
 
 <style>
 
@@ -17,14 +17,13 @@ margin:0;
 header{
 background:#0f172a;
 padding:20px;
-font-size:34px;
-letter-spacing:2px;
+font-size:32px;
 }
 
 button{
-padding:14px 24px;
-margin:10px;
-font-size:18px;
+padding:12px 20px;
+margin:6px;
+font-size:16px;
 border:none;
 border-radius:8px;
 cursor:pointer;
@@ -37,12 +36,21 @@ background:#16a34a;
 }
 
 #menu{
-margin-top:40px;
+margin-top:30px;
+}
+
+#instructions{
+max-width:700px;
+margin:auto;
+background:#111827;
+padding:20px;
+border-radius:10px;
+line-height:1.6;
 }
 
 #game{
 display:none;
-max-width:950px;
+max-width:900px;
 margin:auto;
 padding:20px;
 }
@@ -56,20 +64,11 @@ margin-bottom:15px;
 color:#facc15;
 }
 
-#slot{
-font-size:30px;
-background:#111827;
-padding:20px;
-border-radius:10px;
+#citationLine{
+border:2px dashed #94a3b8;
+padding:10px;
+min-height:40px;
 margin-bottom:20px;
-}
-
-.dropzone{
-display:inline-block;
-border-bottom:3px solid white;
-min-width:130px;
-height:30px;
-margin:8px;
 }
 
 .piece{
@@ -81,11 +80,16 @@ border-radius:6px;
 cursor:pointer;
 }
 
+#feedback{
+margin-top:15px;
+font-size:18px;
+color:#fbbf24;
+}
+
 #animation{
-font-size:60px;
+font-size:40px;
 opacity:0;
 transition:opacity .5s;
-margin-top:20px;
 }
 
 #leaderboard{
@@ -96,18 +100,33 @@ border-radius:10px;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<header>🎰 Citation Chaos Arcade</header>
+<header>🎰 Citation Chaos</header>
 
 <div id="menu">
 
-<h2>Select Mode</h2>
+<div id="instructions">
 
-<button onclick="startGame('APA')">APA Mode</button>
-<button onclick="startGame('MLA')">MLA Mode</button>
+<h2>How to Play</h2>
+
+<p>
+1️⃣ Choose APA or MLA.<br><br>
+2️⃣ Click the citation pieces in the correct order.<br><br>
+3️⃣ Press <b>Check Citation</b>.<br><br>
+4️⃣ If incorrect, the game will explain what part of the citation was wrong.<br><br>
+5️⃣ Learn and try again or skip to the next citation!
+</p>
+
+</div>
+
+<br>
+
+<button onclick="startGame('APA')">Play APA</button>
+<button onclick="startGame('MLA')">Play MLA</button>
 
 </div>
 
@@ -121,58 +140,46 @@ Time: <span id="timer">90</span>
 
 </div>
 
-<div id="slot">
+<button onclick="spinCitation()">New Citation</button>
+<button onclick="undo()">Undo</button>
 
-🎰 Press SPIN to generate a citation challenge!
-
-</div>
-
-<button onclick="spinSlot()">SPIN</button>
-
-<div id="citationArea"></div>
+<div id="citationLine"></div>
 
 <div id="pieces"></div>
 
-<br>
-
 <button onclick="checkAnswer()">Check Citation</button>
 
-<div id="animation">🎉</div>
+<div id="feedback"></div>
+
+<div>
+
+<button onclick="retry()">Try Again</button>
+<button onclick="spinCitation()">Next Citation</button>
+
+</div>
+
+<div id="animation"></div>
 
 <div id="leaderboard">
 
 <h3>🏆 Leaderboard</h3>
-
 <div id="scores"></div>
 
 </div>
 
 </div>
 
-<audio id="spinSound">
-<source src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-spin-1931.mp3">
-</audio>
-
-<audio id="winSound">
-<source src="https://assets.mixkit.co/sfx/preview/mixkit-video-game-win-2016.mp3">
-</audio>
-
-<audio id="loseSound">
-<source src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-game-over-213.mp3">
-</audio>
-
 <script>
 
 let style="APA"
 let score=0
 let time=90
+let playerOrder=[]
 let currentPuzzle=null
-let selectedPiece=null
 
 let puzzles={
 
 APA:[
-
 {
 correct:[
 "Smith, J.",
@@ -180,6 +187,13 @@ correct:[
 "The psychology of motivation.",
 "Journal of Learning, 12(2),",
 "45–59."
+],
+tips:[
+"Author comes first in APA.",
+"The year follows the author in parentheses.",
+"The article title comes next.",
+"Journal title and volume appear next.",
+"Page numbers appear at the end."
 ]
 },
 
@@ -190,13 +204,19 @@ correct:[
 "Culture and communication.",
 "Communication Review, 9(1),",
 "12–28."
+],
+tips:[
+"APA starts with the author.",
+"Year appears after the author.",
+"Article title follows.",
+"Journal title and issue come next.",
+"Pages appear last."
 ]
 }
 
 ],
 
 MLA:[
-
 {
 correct:[
 "Smith, John.",
@@ -204,19 +224,15 @@ correct:[
 "Journal of Learning,",
 "vol. 12, no. 2,",
 "2020, pp. 45–59."
-]
-},
-
-{
-correct:[
-"Garcia, Luis.",
-"\"Culture and Communication.\"",
-"Communication Review,",
-"vol. 9, no. 1,",
-"2018, pp. 12–28."
+],
+tips:[
+"MLA begins with the author.",
+"Article title appears in quotation marks.",
+"Journal title follows the article title.",
+"Volume and issue numbers come next.",
+"Year and page numbers appear last."
 ]
 }
-
 ]
 
 }
@@ -232,27 +248,22 @@ document.getElementById("style").textContent=style
 
 startTimer()
 
+spinCitation()
+
 }
 
-function spinSlot(){
+function spinCitation(){
 
-document.getElementById("spinSound").play()
+playerOrder=[]
 
-let puzzleList=puzzles[style]
+let list=puzzles[style]
 
-currentPuzzle=puzzleList[Math.floor(Math.random()*puzzleList.length)]
+currentPuzzle=list[Math.floor(Math.random()*list.length)]
 
-let slot=document.getElementById("slot")
+document.getElementById("citationLine").innerHTML=""
+document.getElementById("feedback").innerHTML=""
 
-slot.innerHTML="🎰 Spinning..."
-
-setTimeout(()=>{
-
-slot.innerHTML="Citation Generated!"
-
-buildPuzzle()
-
-},1500)
+buildPieces()
 
 }
 
@@ -262,53 +273,26 @@ return array.sort(()=>Math.random()-0.5)
 
 }
 
-function buildPuzzle(){
-
-let area=document.getElementById("citationArea")
-
-area.innerHTML=""
-
-let correct=currentPuzzle.correct
-
-correct.forEach(()=>{
-
-let zone=document.createElement("div")
-
-zone.className="dropzone"
-
-zone.onclick=function(){
-
-if(selectedPiece && zone.innerHTML===""){
-
-zone.textContent=selectedPiece
-
-selectedPiece=null
-
-}
-
-}
-
-area.appendChild(zone)
-
-})
+function buildPieces(){
 
 let piecesDiv=document.getElementById("pieces")
 
 piecesDiv.innerHTML=""
 
-let shuffled=shuffle([...correct])
+let shuffled=shuffle([...currentPuzzle.correct])
 
 shuffled.forEach(p=>{
 
 let div=document.createElement("div")
 
 div.className="piece"
-
 div.textContent=p
 
 div.onclick=function(){
 
-selectedPiece=p
+playerOrder.push(p)
+updateLine()
+div.style.display="none"
 
 }
 
@@ -318,33 +302,70 @@ piecesDiv.appendChild(div)
 
 }
 
+function updateLine(){
+
+document.getElementById("citationLine").innerHTML=playerOrder.join(" ")
+
+}
+
+function undo(){
+
+playerOrder.pop()
+updateLine()
+
+spinCitation()
+
+}
+
 function checkAnswer(){
 
-let zones=document.querySelectorAll(".dropzone")
+let correct=currentPuzzle.correct
 
-let answer=[]
-
-zones.forEach(z=>answer.push(z.textContent))
-
-if(JSON.stringify(answer)===JSON.stringify(currentPuzzle.correct)){
-
-document.getElementById("winSound").play()
+if(JSON.stringify(playerOrder)===JSON.stringify(correct)){
 
 score+=10
-
 document.getElementById("score").textContent=score
 
-showAnimation("🎉 JACKPOT!")
+showAnimation("🎉 Correct!")
 
-spinSlot()
+spinCitation()
 
 }else{
 
-document.getElementById("loseSound").play()
+giveFeedback()
 
 showAnimation("❌")
 
 }
+
+}
+
+function giveFeedback(){
+
+let correct=currentPuzzle.correct
+
+for(let i=0;i<playerOrder.length;i++){
+
+if(playerOrder[i]!==correct[i]){
+
+document.getElementById("feedback").innerHTML=
+"Learning Tip: "+currentPuzzle.tips[i]
+
+break
+
+}
+
+}
+
+}
+
+function retry(){
+
+playerOrder=[]
+document.getElementById("citationLine").innerHTML=""
+document.getElementById("feedback").innerHTML=""
+
+buildPieces()
 
 }
 
@@ -353,7 +374,6 @@ function showAnimation(text){
 let anim=document.getElementById("animation")
 
 anim.innerHTML=text
-
 anim.style.opacity=1
 
 setTimeout(()=>{
@@ -430,4 +450,3 @@ displayScores()
 
 </body>
 </html>
-
